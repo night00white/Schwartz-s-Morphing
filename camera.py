@@ -1,5 +1,7 @@
 import cv2
 import mediapipe as mp
+# Explicit submodule import to fix 'no attribute solutions' error
+import mediapipe.python.solutions
 import numpy as np
 from scipy.spatial import Delaunay
 import time
