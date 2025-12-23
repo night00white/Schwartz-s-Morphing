@@ -1,5 +1,11 @@
 import cv2
 import mediapipe as mp
+try:
+    # Try to explicitly import solutions if available to fix namespace issues
+    import mediapipe.python.solutions
+except ImportError:
+    pass
+    
 import numpy as np
 from scipy.spatial import Delaunay
 import time
