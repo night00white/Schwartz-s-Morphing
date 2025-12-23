@@ -16,15 +16,12 @@ CONF_THRESH = 0.5
 CROP_MARGIN = 0.25
 CROP_SIZE = 400
 
-mp_face = getattr(mp.solutions, 'face_detection', None)
-mp_mesh = getattr(mp.solutions, 'face_mesh', None)
+# Explicitly import the submodules we need
+import mediapipe.python.solutions.face_detection as mp_face_detection
+import mediapipe.python.solutions.face_mesh as mp_face_mesh
 
-if not mp_face or not mp_mesh:
-    # Explicit backup import for stubborn environments
-    import mediapipe.python.solutions.face_detection
-    import mediapipe.python.solutions.face_mesh
-    mp_face = mp.solutions.face_detection
-    mp_mesh = mp.solutions.face_mesh
+mp_face = mp_face_detection
+mp_mesh = mp_face_mesh
 
 class FaceMorpher:
     def __init__(self):
