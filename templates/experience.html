@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Morph</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="window" style="width: 700px;">
+        <div class="title-bar">
+            <span class="title-bar-text">Morph.exe - Active</span>
+        </div>
+
+        <div class="content">
+            <div class="video-frame-container">
+                <img src="{{ url_for('video_feed') }}" class="video-feed" alt="Camera Feed">
+            </div>
+
+            <div class="status-panel">
+                <div class="status-line">
+                    <span class="checkbox-fake checked"></span> Camera Input Signal
+                </div>
+                <div class="status-line">
+                    <span class="checkbox-fake checked"></span> Face Tracking Daemon
+                </div>
+                <div class="status-line">
+                    <span class="checkbox-fake checked"></span> Morph Synthesis Engine
+                </div>
+            </div>
+
+            <a href="/" class="link-retro">&lt;&lt; Abort Sequence</a>
+        </div>
+    </div>
+
+</body>
+
+</html>

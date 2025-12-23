@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Shift</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="window">
+        <!-- Title Bar -->
+        <div class="title-bar">
+            <span class="title-bar-text">System Initialization</span>
+        </div>
+
+        <div class="content">
+            <h1>Identity Shift</h1>
+
+            <div class="instructions">
+                <p><strong>SYSTEM GUIDE:</strong></p>
+                <ol style="text-align: left; margin-bottom: 20px; padding-left: 40px;">
+                    <li>Select a target identity from the <strong>Gallery</strong>.</li>
+                    <li>OR Upload a custom reference image.</li>
+                    <li>Initialize to begin biometric morphing.</li>
+                </ol>
+            </div>
+
+            <p>Select a reference identity to morph with <strong>BELOW</strong> &#9660;, or access the camera directly.
+            </p>
+
+            <form action="/upload" method="post" enctype="multipart/form-data" id="mainForm">
+                <!-- Gallery Section -->
+                <div style="text-align: left; margin-bottom: 5px; font-weight: bold;">GALLERY SELECTION:</div>
+                <div class="gallery-grid">
+                    <div class="gallery-item" onclick="selectGalleryItem(this, 'mona_lisa.webp')" title="Mona Lisa">
+                        <img src="{{ url_for('static', filename='gallery/mona_lisa.webp') }}" alt="Mona Lisa">
+                    </div>
+                    <div class="gallery-item" onclick="selectGalleryItem(this, 'Davici.webp')" title="Da Vinci">
+                        <img src="{{ url_for('static', filename='gallery/Davici.webp') }}" alt="Da Vinci">
+                    </div>
+                </div>
+                <input type="hidden" name="selected_image" id="selectedImageInput">
+
+                <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                    <!-- Clarified Label -->
+                    <span class="upload-label">Or Upload:</span>
+                    <span id="fileName" class="file-name-display">[ OPTIONAL SELECT ]</span>
+                    <input type="file" name="file" id="fileInput" accept="image/*" onchange="updateFileName(this)"
+                        style="display: none;">
+                </div>
+
+                <div style="text-align: right;">
+                    <button type="submit" class="btn" id="actionBtn">INITIALIZE SYSTEM >></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function updateFileName(input) {
+            const fileName = input.files[0] ? input.files[0].name : "[ OPTIONAL SELECT ]";
+            document.getElementById('fileName').innerText = fileName;
+
+            // Clear gallery selection if file is chosen
+            if (input.files[0]) {
+                document.querySelectorAll('.gallery-item').forEach(el => el.classList.remove('selected'));
+                document.getElementById('selectedImageInput').value = '';
+                document.getElementById('actionBtn').innerText = "LOAD FILE >";
+            }
+        }
+
+        function selectGalleryItem(el, filename) {
+            // Clear file input
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').innerText = "[ OPTIONAL SELECT ]";
+
+            // Highlight
+            document.querySelectorAll('.gallery-item').forEach(item => item.classList.remove('selected'));
+            el.classList.add('selected');
+
+            // Set Hidden Input
+            document.getElementById('selectedImageInput').value = filename;
+            document.getElementById('actionBtn').innerText = "LOAD SELECTION >";
+        }
+    </script>
+</body>
+
+</html>
