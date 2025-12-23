@@ -1,5 +1,6 @@
 flask
 opencv-python-headless
-mediapipe
+mediapipe==0.10.9
+protobuf<4.24
 numpy==1.26.4
 scipy
