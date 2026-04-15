@@ -1,4 +1,6 @@
 flask
-opencv-python-headless
-mediapipe==0.10.14numpy==1.26.4
+opencv-contrib-python-headless
+mediapipe==0.10.14
+numpy==1.26.4
 scipy
+gunicorn
