@@ -80,11 +80,25 @@
                     body: JSON.stringify({ image: dataUrl })
                 });
 
-                const result = await resp.json();
+                const text = await resp.text();
+                let result;
+                try { 
+                    result = JSON.parse(text); 
+                } catch (e) {
+                    output.alt = "JSON Parse Error. Server Status: " + resp.status + " | " + text.substring(0, 100);
+                    return;
+                }
+
                 if (result.image) {
                     output.src = result.image;
+                } else if (result.error) {
+                    output.alt = "Backend Error: " + result.error;
+                    console.error(result.trace);
+                } else {
+                    output.alt = "Server responded with empty image and no error.";
                 }
             } catch (err) {
+                output.alt = "Frontend Network Error: " + err.message;
                 console.error("Error sending frame:", err);
             }
         }

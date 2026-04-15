@@ -110,8 +110,10 @@ def process_frontend_frame():
         encoded = base64.b64encode(buffer).decode("utf-8")
         return jsonify({"image": f"data:image/jpeg;base64,{encoded}"})
     except Exception as e:
-        print("Error processing frame:", e)
-        return jsonify({"image": None})
+        import traceback
+        err_msg = traceback.format_exc()
+        print("Error processing frame:", err_msg)
+        return jsonify({"image": None, "error": str(e), "trace": err_msg})
 
 @app.route('/status')
 def get_status():
