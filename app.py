@@ -6,7 +6,7 @@ local_packages = os.path.join(os.path.dirname(__file__), 'site-packages')
 if local_packages not in sys.path:
     sys.path.insert(0, local_packages)
 
-from flask import Flask, render_template, Response, request, redirect, url_for
+from flask import Flask, render_template, Response, request, redirect, url_for, jsonify
 import cv2
 import os
 import base64
