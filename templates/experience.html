@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Morph</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="window">
+        <div class="title-bar">
+            <span class="title-bar-text">Morph.exe - Active</span>
+        </div>
+
+        <div class="content">
+            <div class="video-frame-container">
+                <img src="{{ url_for('video_feed') }}" class="video-feed" alt="Camera Feed">
+            </div>
+
+            <div class="status-panel">
+                <div class="status-line">
+                    <span class="checkbox-fake checked"></span> Camera Input Signal
+                </div>
+                <div class="status-line">
+                    <span class="checkbox-fake checked"></span> Face Tracking Daemon
+                </div>
+                <div class="status-line">
+                    <span class="checkbox-fake checked"></span> Morph Synthesis Engine
+                </div>
+            </div>
+
+            <!-- Selection screen disabled -->
+            
+            <br><br>
+            <div id="resultContainer" style="display:none; text-align:center; gap: 10px; flex-direction: column;">
+                <a href="/grid_result" class="btn" target="_blank" style="padding: 10px 20px; font-size: 1.2rem; background: #ffffaa;">SHOW RESULT (3x3 GRID) &gt;&gt;</a>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                    <a href="/restart" class="btn" style="padding: 10px 20px; font-size: 1rem; background: #aaf;">START NEXT ROUND</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const checkInterval = setInterval(() => {
+            fetch('/status')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.complete) {
+                        clearInterval(checkInterval);
+                        document.getElementById('resultContainer').style.display = 'flex';
+                    }
+                });
+        }, 1000);
+    </script>
+</body>
+
+</html>

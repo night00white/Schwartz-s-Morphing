@@ -1,0 +1,4 @@
+site-packages/
+__pycache__/
+*.pyc
+uploads/
