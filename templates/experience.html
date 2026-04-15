@@ -17,7 +17,13 @@
 
         <div class="content">
             <div class="video-frame-container">
+                {% if use_server_camera %}
                 <img src="{{ url_for('video_feed') }}" class="video-feed" alt="Camera Feed">
+                {% else %}
+                <video id="client-video" autoplay playsinline style="display: none;"></video>
+                <canvas id="client-canvas" style="display: none;"></canvas>
+                <img id="processed-feed" class="video-feed" alt="Camera Feed Loading..." src="">
+                {% endif %}
             </div>
 
             <div class="status-panel">
@@ -45,6 +51,51 @@
     </div>
 
     <script>
+        {% if not use_server_camera %}
+        async function startCamera() {
+            const video = document.getElementById("client-video");
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            video.srcObject = stream;
+            await video.play();
+        }
+
+        async function sendFrame() {
+            const video = document.getElementById("client-video");
+            const canvas = document.getElementById("client-canvas");
+            const output = document.getElementById("processed-feed");
+
+            if (!video.videoWidth) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            ctx.drawImage(video, 0, 0);
+
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+
+            try {
+                const resp = await fetch("/process_frame", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: dataUrl })
+                });
+
+                const result = await resp.json();
+                if (result.image) {
+                    output.src = result.image;
+                }
+            } catch (err) {
+                console.error("Error sending frame:", err);
+            }
+        }
+
+        startCamera().then(() => {
+            setInterval(sendFrame, 200);
+        }).catch(err => {
+            console.error("Camera access denied or unavailable", err);
+        });
+        {% endif %}
+
         const checkInterval = setInterval(() => {
             fetch('/status')
                 .then(res => res.json())

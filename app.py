@@ -9,7 +9,11 @@ if local_packages not in sys.path:
 from flask import Flask, render_template, Response, request, redirect, url_for
 import cv2
 import os
+import base64
+import numpy as np
 from camera import FaceMorpher
+
+USE_SERVER_CAMERA = os.environ.get("USE_SERVER_CAMERA", "false").lower() == "true"
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -73,11 +77,41 @@ def autostart():
 
 @app.route('/experience')
 def experience():
-    return render_template('experience.html')
+    return render_template('experience.html', use_server_camera=USE_SERVER_CAMERA)
 
 @app.route('/video_feed')
 def video_feed():
+    if not USE_SERVER_CAMERA:
+        return "Server camera disabled", 403
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/process_frame', methods=['POST'])
+def process_frontend_frame():
+    if USE_SERVER_CAMERA:
+        return "Frontend camera disabled", 403
+        
+    data = request.get_json()
+    if not data or 'image' not in data:
+        return jsonify({"image": None}), 400
+        
+    try:
+        image_data = data["image"].split(",")[1]
+        image_bytes = base64.b64decode(image_data)
+        np_arr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        
+        # Process frame
+        processed_frame = morpher.process_frame(frame)
+        if processed_frame is None:
+            # Fall back to original frame if no face is detected or during loading
+            processed_frame = frame
+            
+        _, buffer = cv2.imencode('.jpg', processed_frame)
+        encoded = base64.b64encode(buffer).decode("utf-8")
+        return jsonify({"image": f"data:image/jpeg;base64,{encoded}"})
+    except Exception as e:
+        print("Error processing frame:", e)
+        return jsonify({"image": None})
 
 @app.route('/status')
 def get_status():
