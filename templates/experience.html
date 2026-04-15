@@ -20,9 +20,9 @@
                 {% if use_server_camera %}
                 <img src="{{ url_for('video_feed') }}" class="video-feed" alt="Camera Feed">
                 {% else %}
-                <video id="client-video" autoplay playsinline style="display: none;"></video>
-                <canvas id="client-canvas" style="display: none;"></canvas>
-                <img id="processed-feed" class="video-feed" alt="Camera Feed Loading..." src="">
+                <video id="video" autoplay playsinline muted style="display: none;"></video>
+                <canvas id="capture" style="display: none;"></canvas>
+                <img id="output" class="video-feed" alt="Camera Feed Loading..." src="">
                 {% endif %}
             </div>
 
@@ -53,16 +53,16 @@
     <script>
         {% if not use_server_camera %}
         async function startCamera() {
-            const video = document.getElementById("client-video");
+            const video = document.getElementById("video");
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             video.srcObject = stream;
             await video.play();
         }
 
         async function sendFrame() {
-            const video = document.getElementById("client-video");
-            const canvas = document.getElementById("client-canvas");
-            const output = document.getElementById("processed-feed");
+            const video = document.getElementById("video");
+            const canvas = document.getElementById("capture");
+            const output = document.getElementById("output");
 
             if (!video.videoWidth) return;
 
