@@ -38,15 +38,7 @@
                 </div>
             </div>
 
-            <!-- Selection screen disabled -->
-            
             <br><br>
-            <div id="resultContainer" style="display:none; text-align:center; gap: 10px; flex-direction: column;">
-                <a href="/grid_result" class="btn" target="_blank" style="padding: 10px 20px; font-size: 1.2rem; background: #ffffaa;">SHOW RESULT (3x3 GRID) &gt;&gt;</a>
-                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
-                    <a href="/restart" class="btn" style="padding: 10px 20px; font-size: 1rem; background: #aaf;">START NEXT ROUND</a>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -104,11 +96,49 @@
         }
 
         startCamera().then(() => {
-            setInterval(sendFrame, 200);
+            window.sendFrameInterval = setInterval(sendFrame, 200);
         }).catch(err => {
             console.error("Camera access denied or unavailable", err);
         });
         {% endif %}
+
+        let roundEnded = false;
+        function triggerEndRound() {
+            if (roundEnded) return;
+            roundEnded = true;
+
+            // Stop frontend polling to save resources
+            {% if not use_server_camera %}
+            if (window.sendFrameInterval) clearInterval(window.sendFrameInterval);
+            const videoElement = document.getElementById("video");
+            if (videoElement) videoElement.pause();
+            {% endif %}
+
+            let imgElement = document.getElementById("output");
+            if (!imgElement) imgElement = document.querySelector(".video-feed");
+
+            // Fetch the grid result and show it automatically
+            fetch('/grid_result')
+                .then(res => {
+                    if (res.ok) {
+                        return res.blob();
+                    }
+                    throw new Error("Grid not ready");
+                })
+                .then(blob => {
+                    imgElement.src = URL.createObjectURL(blob);
+                    
+                    // Display the result for 5 seconds before jumping to the next round
+                    setTimeout(() => {
+                        window.location.href = "/restart";
+                    }, 5000);
+                })
+                .catch(err => {
+                    console.error(err);
+                    // Jump to next round immediately if result is missing (fallback)
+                    window.location.href = "/restart";
+                });
+        }
 
         const checkInterval = setInterval(() => {
             fetch('/status')
@@ -116,10 +146,15 @@
                 .then(data => {
                     if (data.complete) {
                         clearInterval(checkInterval);
-                        document.getElementById('resultContainer').style.display = 'flex';
+                        triggerEndRound();
                     }
                 });
         }, 1000);
+
+        // Fallback: If 30 seconds pass and the round hasn't naturally completed, force cycle
+        setTimeout(() => {
+            triggerEndRound();
+        }, 30000);
     </script>
 </body>
 
